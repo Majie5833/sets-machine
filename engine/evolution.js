@@ -5,7 +5,7 @@ import { backtest, FAMILIES } from './bot.js';
 import { mulberry32, gauss } from './rng.js';
 
 export const GENES = [
-  { key: '家族', label: 'FAMILY', min: 0, max: 3, int: true, fmt: (v) => FAMILIES[v] },
+  { key: 'family', label: '家族', min: 0, max: 3, int: true, fmt: (v) => FAMILIES[v] },
   { key: 'lookback', label: 'LOOKBACK', min: 10, max: 200, int: true, fmt: (v) => v + ' h' },
   { key: 'entryZ', label: 'ENTRY Z', min: 0.2, max: 2.5, fmt: (v) => v.toFixed(2) + 'σ' },
   { key: 'levels', label: 'GRID LEVELS', min: 2, max: 8, int: true, fmt: (v) => String(v) },
