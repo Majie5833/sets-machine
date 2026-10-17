@@ -5,14 +5,14 @@ import { backtest, FAMILIES } from './bot.js';
 import { mulberry32, gauss } from './rng.js';
 
 export const GENES = [
-  { key: 'family', label: 'FAMILY', min: 0, max: 3, int: true, fmt: (v) => FAMILIES[v] },
+  { key: '家族', label: 'FAMILY', min: 0, max: 3, int: true, fmt: (v) => FAMILIES[v] },
   { key: 'lookback', label: 'LOOKBACK', min: 10, max: 200, int: true, fmt: (v) => v + ' h' },
   { key: 'entryZ', label: 'ENTRY Z', min: 0.2, max: 2.5, fmt: (v) => v.toFixed(2) + 'σ' },
   { key: 'levels', label: 'GRID LEVELS', min: 2, max: 8, int: true, fmt: (v) => String(v) },
   { key: 'spacing', label: 'SPACING', min: 0.003, max: 0.03, fmt: (v) => (v * 100).toFixed(2) + '%' },
   { key: 'mult', label: 'SIZE MULT', min: 1, max: 2, fmt: (v) => v.toFixed(2) + 'x' },
   { key: 'tp', label: 'TAKE PROFIT', min: 0.003, max: 0.04, fmt: (v) => (v * 100).toFixed(2) + '%' },
-  { key: 'stop', label: 'STOP', min: 0.01, max: 0.12, fmt: (v) => (v * 100).toFixed(1) + '%' },
+  { key: 'stop', label: '止损', min: 0.01, max: 0.12, fmt: (v) => (v * 100).toFixed(1) + '%' },
 ];
 
 const fix = (G, v) => { v = Math.min(G.max, Math.max(G.min, v)); return G.int ? Math.round(v) : v; };
@@ -33,7 +33,7 @@ export function mutate(g, r, p = 0.18, scale = 0.12) {
   const out = { ...g }, changed = [];
   for (const G of GENES) {
     if (r() >= p) continue;
-    if (G.key === 'family') { if (r() < 0.2) out.family = Math.floor(r() * 4); }
+    if (G.key === '家族') { if (r() < 0.2) out.family = Math.floor(r() * 4); }
     else out[G.key] = fix(G, g[G.key] + gauss(r) * scale * (G.max - G.min));
     if (out[G.key] !== g[G.key]) changed.push(G.key);
   }
