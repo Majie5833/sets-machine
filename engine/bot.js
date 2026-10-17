@@ -58,7 +58,7 @@ export class GridBot {
         if (!L.filled && s.low[i] <= L.price) this._fill(L, L.price, i, ev);
       }
       this.tp = this.avg * (1 + g.tp);
-      if (s.low[i] <= this.stop) this._close(this.stop, i, '止损', ev);
+      if (s.low[i] <= this.stop) this._close(this.stop, i, 'STOP', ev);
       else if (s.high[i] >= this.tp) this._close(this.tp, i, 'TP', ev);
     }
     const eq = this.equity(s.close[i]);
