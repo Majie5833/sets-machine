@@ -192,7 +192,7 @@ function stageText(stage) {
   ][stage];
 }
 
-const PHASES = [[1, '扫描', '读取行情中'], [1, '扫描', '注入新基因'], [2, '繁殖', '交叉+变异'], [3, '回测', '回测后代中'], [3, '选择', 'the gate kills the weak'], [4, '部署', '王者接管纸面交易']];
+const PHASES = [[1, '扫描', '读取行情中'], [1, '扫描', '注入新基因'], [2, '繁殖', '交叉+变异'], [3, '回测', '回测后代中'], [3, '选择', '考核线淘汰弱者'], [4, '部署', '王者接管纸面交易']];
 
 function render() {
   const evo = st.evo, rep = st.rep, ct = st.ct, stage = Math.min(5, Math.floor(ct / STAGE)), sp = (ct - stage * STAGE) / STAGE;
