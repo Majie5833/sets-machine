@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SETS MACHINE · Self Evolving Trading System</title>
-<meta name="description" content="A genetic algorithm breeds grid-DCA strategies on real BTC candles, kills what fails out-of-sample and paper-trades the survivor. Live, in your browser.">
+<title>SETS MACHINE · 自进化交易系统</title>
+<meta name="description" content="遗传算法在真实BTC K线上进化网格-DCA策略，淘汰样本外失败者，幸存者接管纸面交易。全在浏览器里实时运行。">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -15,113 +15,113 @@
     <canvas id="logo" class="logo" aria-hidden="true"></canvas>
     <div class="brand">
       <h1>SETS <span>MACHINE</span></h1>
-      <div class="sub"><b>S</b>ELF <b>E</b>VOLVING <b>T</b>RADING <b>S</b>YSTEM · <span id="sym">BTCUSDT</span> · PAPER · NON-CUSTODIAL</div>
+      <div class="sub"><b>自</b>进化<b>交易</b>系统 · <span id="sym">BTCUSDT</span> · 纸面交易 · 不碰真实资金</div>
     </div>
     <div class="stats">
-      <div class="stat"><label>GENERATION</label><b id="sGen">#0</b></div>
-      <div class="stat"><label>BACKTESTS</label><b id="sTested">0</b></div>
-      <div class="stat"><label>KILL RATE</label><b id="sKill" class="acc">0%</b></div>
-      <div class="stat"><label>SURVIVORS</label><b id="sSurv">0</b></div>
+      <div class="stat"><label>进化代数</label><b id="sGen">#0</b></div>
+      <div class="stat"><label>回测次数</label><b id="sTested">0</b></div>
+      <div class="stat"><label>淘汰率</label><b id="sKill" class="acc">0%</b></div>
+      <div class="stat"><label>幸存者</label><b id="sSurv">0</b></div>
     </div>
-    <div class="spark"><canvas id="spark" aria-hidden="true"></canvas><label>SURVIVORS / GEN</label></div>
+    <div class="spark"><canvas id="spark" aria-hidden="true"></canvas><label>每代幸存数</label></div>
     <div class="clock"><b id="clock">--:--:--</b><span class="pill"><i></i><em id="lat">PAPER</em></span></div>
   </header>
 
   <nav class="panel bar" aria-label="Simulation controls">
-    <button id="bPlay" class="btn pri" aria-label="Pause">❚❚ PAUSE</button>
-    <button id="bStep" class="btn" title="Next generation (→)">STEP ›</button>
+    <button id="bPlay" class="btn pri" aria-label="Pause">❚❚ 暂停</button>
+    <button id="bStep" class="btn" title="Next generation (→)">下一步 ›</button>
     <div class="seg" role="group" aria-label="Speed">
       <button class="btn" data-speed="1">1×</button><button class="btn" data-speed="2">2×</button><button class="btn" data-speed="4">4×</button><button class="btn" data-speed="8">8×</button>
     </div>
-    <label class="seed">SEED <input id="seed" type="number" min="1" max="999999" inputmode="numeric"></label>
-    <button id="bSeed" class="btn" title="Restart with this seed">RESTART</button>
-    <button id="bRand" class="btn" title="Random seed">NEW SEED</button>
+    <label class="seed">种子 <input id="seed" type="number" min="1" max="999999" inputmode="numeric"></label>
+    <button id="bSeed" class="btn" title="用此种子重新开始">重新开始</button>
+    <button id="bRand" class="btn" title="随机新种子">换种子</button>
     <span class="meta" id="meta"></span>
   </nav>
 
   <section class="row evo">
     <div class="panel ringp">
-      <div class="ph"><h2>EVOLUTION LOOP</h2><span class="tag">SELF-REWRITING</span></div>
-      <div class="phs">OBSERVE → MUTATE → TEST → SELECT → DEPLOY</div>
+      <div class="ph"><h2>进化循环</h2><span class="tag">自我改写</span></div>
+      <div class="phs">观察 → 变异 → 回测 → 选择 → 部署</div>
       <canvas id="ring" class="grow" role="img" aria-label="Current stage of the evolution loop"></canvas>
     </div>
     <div class="panel fitp">
-      <div class="ph"><h2>FITNESS · BEST OF GENERATION</h2><span class="r" id="fitNow"></span></div>
-      <div class="phs">TRAIN RETURN − 0.6 × DRAWDOWN · ELITES CARRY OVER, SO BEST NEVER FALLS</div>
+      <div class="ph"><h2>适应度 · 每代最优</h2><span class="r" id="fitNow"></span></div>
+      <div class="phs">适应度 = 训练收益 − 0.6×回撤 · 精英保留制，最优成绩不会倒退</div>
       <canvas id="fit" class="grow" role="img" aria-label="Best and mean fitness per generation"></canvas>
       <div class="kv4">
-        <div><label>POPULATION</label><b id="fPop"></b></div>
-        <div><label>OFFSPRING / GEN</label><b id="fOff"></b></div>
-        <div><label>ELITE KEPT</label><b id="fElite"></b></div>
-        <div><label>Δ FITNESS · 10 GEN</label><b id="fDelta" class="acc"></b></div>
+        <div><label>种群</label><b id="fPop"></b></div>
+        <div><label>每代后代</label><b id="fOff"></b></div>
+        <div><label>保留精英</label><b id="fElite"></b></div>
+        <div><label>适应度变化·10代</label><b id="fDelta" class="acc"></b></div>
       </div>
       <div class="stageline"><span class="dot"></span><b id="stName"></b><span id="stText"></span></div>
     </div>
   </section>
 
   <section class="panel meshp">
-    <div class="ph"><h2>GENE POOL · LIVE STRATEGY GRAPH</h2><div class="phase"><b id="phaseA"></b><span id="phaseB"></span></div></div>
-    <div class="phs">POSITION = GENES · SIZE = RANK · CLICK A NODE TO INSPECT ITS GENOME</div>
+    <div class="ph"><h2>基因池 · 实时策略图谱</h2><div class="phase"><b id="phaseA"></b><span id="phaseB"></span></div></div>
+    <div class="phs">位置=基因 · 大小=排名 · 点击节点查看它的基因</div>
     <div class="legend" id="legend"></div>
     <canvas id="mesh" class="grow" role="img" aria-label="Population graph grouped by species"></canvas>
-    <div class="pf"><span>ONE NODE = ONE CONFIG · LINE = PARENT → CHILD · RING = BIRTH / DEATH</span><span id="meshCount"></span></div>
+    <div class="pf"><span>一个节点=一个策略 · 连线=亲代→子代 · 圆环=新生/死亡</span><span id="meshCount"></span></div>
   </section>
 
   <section class="row trio">
     <div class="panel genep">
-      <div class="ph"><h2 id="genomeTitle">GENOME · LIVE LEADER</h2><span class="r" id="genomeId"></span></div>
-      <div class="phs" id="genomeSub">DNA OF THE CONFIG THAT IS PAPER TRADING</div>
+      <div class="ph"><h2 id="genomeTitle">基因组 · 当前王者</h2><span class="r" id="genomeId"></span></div>
+      <div class="phs" id="genomeSub">正在纸面交易的策略的 DNA</div>
       <div id="genes" class="genes"></div>
       <div class="pf" id="genomeFoot"></div>
     </div>
     <div class="panel selp">
-      <div class="ph"><h2>NATURAL SELECTION</h2><span class="r" id="selGen"></span></div>
-      <div class="phs">WHO SURVIVES THIS GENERATION</div>
+      <div class="ph"><h2>自然选择</h2><span class="r" id="selGen"></span></div>
+      <div class="phs">这一代谁活了下来</div>
       <div id="funnel" class="funnel"></div>
-      <div class="pf"><span>GATE <b>OOS RET &gt; 1% · DD &lt; 10% · ≥3 TRADES · WIN ≥ 50%</b></span></div>
+      <div class="pf"><span>考核线 <b>样本外收益&gt;1% · 回撤&lt;10% · ≥3笔交易 · 胜率≥50%</b></span></div>
     </div>
     <div class="panel kelp">
-      <div class="ph"><h2>KELLY SIZING</h2><span class="r" id="kN"></span></div>
-      <div class="kbig"><b id="kPct"></b><span>optimal bet fraction f*<br><em>g(f) = W·ln(1+fR) + (1−W)·ln(1−f)</em></span></div>
+      <div class="ph"><h2>凯利仓位</h2><span class="r" id="kN"></span></div>
+      <div class="kbig"><b id="kPct"></b><span>最优下注比例 f*<br><em>g(f) = W·ln(1+fR) + (1−W)·ln(1−f)</em></span></div>
       <canvas id="kelly" class="grow" role="img" aria-label="Kelly growth curve"></canvas>
       <div class="kv2">
-        <div><label>WIN RATE W</label><b id="kW"></b></div>
-        <div><label>PAYOFF R</label><b id="kR"></b></div>
-        <div><label>HALF-KELLY</label><b id="kH" class="acc"></b></div>
-        <div><label>EDGE</label><b id="kE" class="acc"></b></div>
+        <div><label>胜率 W</label><b id="kW"></b></div>
+        <div><label>盈亏比 R</label><b id="kR"></b></div>
+        <div><label>半凯利</label><b id="kH" class="acc"></b></div>
+        <div><label>优势</label><b id="kE" class="acc"></b></div>
       </div>
     </div>
   </section>
 
   <section class="row trade">
     <div class="panel chartp">
-      <div class="ph"><h2>GRID ENGINE · <span class="acc" id="chSym">BTCUSDT</span> · PAPER</h2><span class="r" id="chState"></span></div>
+      <div class="ph"><h2>网格引擎 · <span class="acc" id="chSym">BTCUSDT</span> · 纸面</h2><span class="r" id="chState"></span></div>
       <div class="phs" id="chCfg"></div>
       <div class="ohlc" id="ohlc"></div>
       <canvas id="chart" class="grow" role="img" aria-label="Paper trading replay on out-of-sample candles"></canvas>
       <div class="kv6">
-        <div><label>AVG ENTRY</label><b id="cAvg"></b></div>
-        <div><label>TAKE PROFIT</label><b id="cTp" class="acc"></b></div>
-        <div><label>POSITION</label><b id="cPos"></b></div>
-        <div><label>UNREALIZED</label><b id="cUnr"></b></div>
-        <div><label>REALIZED</label><b id="cReal"></b></div>
-        <div><label>EQUITY</label><b id="cEq"></b></div>
+        <div><label>平均成本</label><b id="cAvg"></b></div>
+        <div><label>止盈</label><b id="cTp" class="acc"></b></div>
+        <div><label>持仓</label><b id="cPos"></b></div>
+        <div><label>浮动盈亏</label><b id="cUnr"></b></div>
+        <div><label>已实现</label><b id="cReal"></b></div>
+        <div><label>净值</label><b id="cEq"></b></div>
       </div>
     </div>
     <div class="panel gridp">
-      <div class="ph"><h2>ORDER GRID</h2><span class="badge" id="gridBadge">PRE-COMMITTED</span></div>
+      <div class="ph"><h2>委托网格</h2><span class="badge" id="gridBadge">预先布好</span></div>
       <div class="gtable">
-        <div class="gth"><span>LVL</span><span>PRICE</span><span>SIZE</span><span>STATUS</span></div>
+        <div class="gth"><span>档位</span><span>价格</span><span>数量</span><span>状态</span></div>
         <div id="grows"></div>
       </div>
       <div class="sig" id="sig"></div>
-      <div class="logh">EXECUTION LOG</div>
+      <div class="logh">执行日志</div>
       <div id="log" class="log" aria-live="off"></div>
     </div>
   </section>
 
   <footer class="foot">
-    Paper trading on historical Binance candles. No exchange connection, no keys, no real orders. Not financial advice.
+    基于Binance历史K线的纸面交易。不连接交易所、无密钥、无真实下单。不构成投资建议。
     · MIT licensed
   </footer>
 </main>
