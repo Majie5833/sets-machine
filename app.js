@@ -92,15 +92,15 @@ function startGeneration() {
   st.pending = rep.promoted ? rep.leader : null;
   st.deployed = false;
   const vol = volatility(S, st.paper.i - 1) * 100;
-  pushLog('SCAN', 'ev', `gen ${rep.gen} · tape σ ${vol.toFixed(2)}%/h · ${rep.immigrants.length + rep.offspring.length} new configs`);
+  pushLog('扫描', 'ev', `gen ${rep.gen} · tape σ ${vol.toFixed(2)}%/h · ${rep.immigrants.length + rep.offspring.length} new configs`);
 }
 
 function deploy() {
   st.deployed = true;
   const rep = st.rep;
   if (st.pending) { promote(st.pending, false); st.pending = null; }
-  else if (rep.leader) pushLog('HOLD', 'ev', `gen ${rep.gen} · g${rep.leader.id} defends the title · ${rep.survivors}/${st.evo.N} pass gate`);
-  else pushLog('HOLD', 'bad', `gen ${rep.gen} · nobody passed the gate · staying flat`);
+  else if (rep.leader) pushLog('持有', 'ev', `gen ${rep.gen} · g${rep.leader.id} defends the title · ${rep.survivors}/${st.evo.N} pass gate`);
+  else pushLog('持有', 'bad', `gen ${rep.gen} · nobody passed the gate · staying flat`);
 }
 
 function promote(leader, silent) {
@@ -110,8 +110,8 @@ function promote(leader, silent) {
   const p = st.paper;
   if (!p.bot) p.bot = new GridBot(leader.genome, START_CASH);
   else if (!p.bot.inPos) p.bot = swapBot(leader.genome);
-  else { p.queued = leader.genome; if (!silent) pushLog('QUEUE', 'ev', `g${leader.id} waits for the open position to close`); }
-  if (!silent) pushLog('EVOLVE', 'ev', `gen ${st.rep.gen} · g${leader.id} promoted · OOS ${pct(leader.val.ret)} · DD ${(leader.val.maxDD * 100).toFixed(1)}%`);
+  else { p.queued = leader.genome; if (!silent) pushLog('排队', 'ev', `g${leader.id} waits for the open position to close`); }
+  if (!silent) pushLog('进化', 'ev', `gen ${st.rep.gen} · g${leader.id} promoted · OOS ${pct(leader.val.ret)} · DD ${(leader.val.maxDD * 100).toFixed(1)}%`);
 }
 
 function swapBot(genome) {
@@ -130,15 +130,15 @@ function advancePaper(dt) {
       for (const e of p.bot.step(S, p.i)) {
         st.marks.push(e);
         if (e.type === 'BUY') pushLog('BUY', '', `${e.level} filled @ ${money(e.price)} · $${fmt(e.usd)}`, p.i);
-        else { p.realized += e.pnl; pushLog(e.type === 'TP' ? 'TP' : 'STOP', e.type === 'TP' ? '' : 'bad', `closed @ ${money(e.price)} · ${e.pnl >= 0 ? '+' : '−'}$${Math.abs(e.pnl).toFixed(2)}`, p.i); }
-        if (e.type !== 'BUY' && p.queued) { p.bot = swapBot(p.queued); p.queued = null; pushLog('SWAP', 'ev', 'queued leader takes over the grid', p.i); break; }
+        else { p.realized += e.pnl; pushLog(e.type === 'TP' ? 'TP' : '止损', e.type === 'TP' ? '' : 'bad', `closed @ ${money(e.price)} · ${e.pnl >= 0 ? '+' : '−'}$${Math.abs(e.pnl).toFixed(2)}`, p.i); }
+        if (e.type !== 'BUY' && p.queued) { p.bot = swapBot(p.queued); p.queued = null; pushLog('换将', 'ev', '排队的王者接管网格', p.i); break; }
       }
     }
     p.i++;
     if (p.i >= evo.valTo) {
       if (p.bot && p.bot.inPos) { const cost = p.bot.cost; p.bot.flatten(S, evo.valTo - 1); const tr = p.bot.trades[p.bot.trades.length - 1]; p.realized += tr.pnl; pushLog('EOD', 'bad', `tape end · flattened $${fmt(cost)} · ${tr.pnl >= 0 ? '+' : '−'}$${Math.abs(tr.pnl).toFixed(2)}`, evo.valTo - 1); }
       p.i = evo.valFrom + 24; st.marks = [];
-      pushLog('REWIND', 'ev', 'out-of-sample tape restarts', p.i);
+      pushLog('回放', 'ev', '样本外数据重新开始', p.i);
     }
   }
   if (st.marks.length > 60) st.marks = st.marks.slice(-60);
@@ -188,11 +188,11 @@ function stageText(stage) {
     off && off.parents.length ? `crossover g${off.parents[0]} × g${off.parents[1]} → ${r.offspring.length} offspring · p(mut) 0.18` : `${r.offspring.length} offspring bred`,
     `${r.immigrants.length + r.offspring.length} backtests on real ${META.symbol} ${META.interval} candles`,
     `gate passed ${r.survivors}/${evo.N} · ${r.died.length} killed · ${evo.N - r.died.length} elites kept`,
-    r.leader ? (st.pending || r.promoted ? `g${r.leader.id} hot-swapped into the paper grid` : `leader g${r.leader.id} defends the title`) : 'no survivor yet · grid stays flat',
+    r.leader ? (st.pending || r.promoted ? `g${r.leader.id} hot-swapped into the paper grid` : `leader g${r.leader.id} defends the title`) : '还没有幸存者 · 网格空仓',
   ][stage];
 }
 
-const PHASES = [[1, 'SCAN', 'reading the tape'], [1, 'SCAN', 'injecting new ideas'], [2, 'BREED', 'crossover + mutation'], [3, 'TEST', 'backtesting offspring'], [3, 'SELECT', 'the gate kills the weak'], [4, 'DEPLOY', 'leader goes to the paper grid']];
+const PHASES = [[1, '扫描', '读取行情中'], [1, '扫描', '注入新基因'], [2, '繁殖', '交叉+变异'], [3, '回测', '回测后代中'], [3, '选择', 'the gate kills the weak'], [4, '部署', '王者接管纸面交易']];
 
 function render() {
   const evo = st.evo, rep = st.rep, ct = st.ct, stage = Math.min(5, Math.floor(ct / STAGE)), sp = (ct - stage * STAGE) / STAGE;
@@ -204,7 +204,7 @@ function render() {
   setText($('sSurv'), `${rep.survivors}/${evo.N}`);
   setText($('clock'), new Date().toLocaleTimeString('en-GB'));
   document.querySelector('.pill i').style.opacity = (0.35 + 0.65 * (0.5 + 0.5 * Math.cos(t * Math.PI * 2))).toFixed(2);
-  setText($('lat'), running ? `PAPER · ${speed}×` : 'PAUSED');
+  setText($('lat'), running ? `PAPER · ${speed}×` : '已暂停');
   D.drawLogo(cv.logo, t);
   D.drawSpark(cv.spark, evo.history.map((h) => h.survivors), evo.N);
   // ring + fitness
@@ -212,7 +212,7 @@ function render() {
   const gf = Math.max(0, evo.history.length - 2 + clamp(ct / CYCLE, 0, 1));
   D.drawFitness(cv.fit, evo.history, gf);
   const H = evo.history, cur = H[H.length - 1], old = H[Math.max(0, H.length - 11)];
-  setText($('fitNow'), 'BEST ' + cur.best.toFixed(4));
+  setText($('fitNow'), '最佳 ' + cur.best.toFixed(4));
   setText($('fPop'), String(evo.N));
   setText($('fOff'), String(rep.offspring.length + rep.immigrants.length));
   setText($('fElite'), String(evo.N - rep.offspring.length - rep.immigrants.length));
@@ -235,13 +235,13 @@ function render() {
 function renderGenome() {
   const n = st.inspect && st.nodes.get(st.inspect);
   const ind = n ? n.ind : st.shown;
-  setText($('genomeTitle'), n ? 'GENOME · INSPECTING' : 'GENOME · LIVE LEADER');
-  setText($('genomeSub'), n ? 'CLICK EMPTY SPACE OR PRESS ESC TO RETURN TO THE LEADER' : 'DNA OF THE CONFIG THAT IS PAPER TRADING');
+  setText($('genomeTitle'), n ? '基因组 · 检视中' : '基因组 · 当前王者');
+  setText($('genomeSub'), n ? 'CLICK EMPTY SPACE OR PRESS ESC TO RETURN TO THE LEADER' : '正在纸面交易的策略的 DNA');
   if (!ind) { setHTML($('genes'), '<div class="sig">No config has passed the out-of-sample gate yet.</div>'); setText($('genomeId'), ''); setHTML($('genomeFoot'), ''); return; }
   setText($('genomeId'), `g${ind.id} · BORN GEN ${ind.gen}`);
   const flash = !n && st.geneFlash && st.t - st.geneFlash.t < 2.2 ? st.geneFlash.keys : [];
   setHTML($('genes'), GENES.map((G) => {
-    const v = ind.genome[G.key], on = Math.round((G.key === 'family' ? (v + 1) / 4 : norm(G.key, v)) * 22);
+    const v = ind.genome[G.key], on = Math.round((G.key === '家族' ? (v + 1) / 4 : norm(G.key, v)) * 22);
     let segs = ''; for (let s = 0; s < 22; s++) segs += s < on ? '<i class="on"></i>' : '<i></i>';
     return `<div class="gene${flash.includes(G.key) ? ' mut' : ''}"><span class="n">${G.label}</span><span class="segs">${segs}</span><span class="v">${G.fmt(v)}</span></div>`;
   }).join(''));
@@ -251,18 +251,18 @@ function renderGenome() {
 function renderSelection(stage, sp) {
   const r = st.rep, N = st.evo.N, fresh = r.immigrants.length + r.offspring.length;
   const rows = [
-    ['GENERATED', fresh, stage < 1 ? 0 : stage === 1 ? ease(sp) * (r.immigrants.length / fresh) : stage === 2 ? r.immigrants.length / fresh + ease(sp) * (r.offspring.length / fresh) : 1, stage === 1 || stage === 2],
-    ['BACKTESTED', fresh, stage < 3 ? 0 : stage === 3 ? ease(sp) : 1, stage === 3],
-    ['PASSED GATE', r.survivors, stage < 4 ? 0 : stage === 4 ? ease(sp / 0.6) : 1, stage === 4 && sp < 0.6],
-    ['ELITE KEPT', N - fresh, stage < 4 ? 0 : stage === 4 ? ease((sp - 0.5) / 0.5) : 1, stage === 4 && sp >= 0.5],
-    ['DEPLOYED', r.leader ? 1 : 0, stage < 5 ? 0 : ease(sp / 0.5), stage === 5],
+    ['新生', fresh, stage < 1 ? 0 : stage === 1 ? ease(sp) * (r.immigrants.length / fresh) : stage === 2 ? r.immigrants.length / fresh + ease(sp) * (r.offspring.length / fresh) : 1, stage === 1 || stage === 2],
+    ['已回测', fresh, stage < 3 ? 0 : stage === 3 ? ease(sp) : 1, stage === 3],
+    ['通过考核', r.survivors, stage < 4 ? 0 : stage === 4 ? ease(sp / 0.6) : 1, stage === 4 && sp < 0.6],
+    ['保留精英', N - fresh, stage < 4 ? 0 : stage === 4 ? ease((sp - 0.5) / 0.5) : 1, stage === 4 && sp >= 0.5],
+    ['已部署', r.leader ? 1 : 0, stage < 5 ? 0 : ease(sp / 0.5), stage === 5],
   ];
   setHTML($('funnel'), rows.map(([name, v, f, act]) => {
     const wv = (Math.log(v + 1) / Math.log(N + 1)) * 100;
     return `<div class="fr${act ? ' act' : ''}"><span class="n">${name}</span><span class="v${f > 0 ? '' : ' dim'}">${fmt(f > 0 ? v * f : v)}</span>` +
       `<span class="bar"><i class="p" style="width:${wv.toFixed(1)}%"></i><i class="c" style="width:${(wv * f).toFixed(1)}%"></i></span></div>`;
   }).join(''));
-  setText($('selGen'), 'GEN ' + r.gen);
+  setText($('selGen'), '第 ','代' + r.gen);
 }
 
 // Small samples lie, so both inputs are shrunk: W towards 50% (Beta(2,2) prior) and, when a config
@@ -277,7 +277,7 @@ function kellyInputs(ind) {
 
 function renderKelly(t) {
   const ind = st.shown;
-  if (!ind) { setText($('kPct'), '—'); ['kW', 'kR', 'kH', 'kE'].forEach((id) => setText($(id), '—')); setText($('kN'), 'NO LEADER'); D.drawKelly(cv.kelly, { W: 0.5, R: 1, t }); return; }
+  if (!ind) { setText($('kPct'), '—'); ['kW', 'kR', 'kH', 'kE'].forEach((id) => setText($(id), '—')); setText($('kN'), '没有王者'); D.drawKelly(cv.kelly, { W: 0.5, R: 1, t }); return; }
   const { W, R, n } = kellyInputs(ind), f = Math.max(0, W - (1 - W) / R);
   setText($('kPct'), Math.round(f * 100) + '%');
   setText($('kW'), Math.round(W * 100) + '%'); setText($('kR'), R.toFixed(2));
@@ -294,14 +294,14 @@ function renderTrade() {
     let w = 0; for (let k = 0; k < g.levels; k++) w += Math.pow(g.mult, k);
     preview = Array.from({ length: g.levels }, (_, k) => ({ name: 'L' + (k + 1), price: px * (1 - g.spacing * k), usd: (bot.cash / w) * Math.pow(g.mult, k), filled: false }));
   }
-  const price = D.drawChart(cv.chart, { s: S, from: st.evo.valFrom, i, frac: p.frac, bot, preview, marks: st.marks, empty: bot ? '' : 'WAITING FOR THE FIRST SURVIVOR' });
+  const price = D.drawChart(cv.chart, { s: S, from: st.evo.valFrom, i, frac: p.frac, bot, preview, marks: st.marks, empty: bot ? '' : '等待第一个幸存者' });
   const o = S.open[i], c = price;
   setHTML($('ohlc'), `<em>${tapeTime(S.time[i])} UTC</em>  <em>O</em>${money(o)}  <em>C</em>${money(c)}  <em>Δ</em>${pct(c / o - 1, 2)}  <em>VOL</em>${fmt(S.volume[i] * p.frac)} BTC`);
   setText($('chSym'), META.symbol);
-  if (!bot) { setText($('chCfg'), 'NO LEADER YET'); setText($('chState'), 'FLAT'); }
+  if (!bot) { setText($('chCfg'), '还没有王者'); setText($('chState'), 'FLAT'); }
   else {
     setText($('chCfg'), `LEADER g${st.shown ? st.shown.id : '?'} · ${FAMILIES[g.family]} · ${g.levels} LEVELS · ${(g.spacing * 100).toFixed(2)}% SPACING · TP ${(g.tp * 100).toFixed(2)}%`);
-    setText($('chState'), bot.inPos ? `IN POSITION · ${bot.levels.filter((L) => L.filled).length}/${bot.levels.length} FILLED` : 'FLAT · WAITING FOR SIGNAL');
+    setText($('chState'), bot.inPos ? `IN POSITION · ${bot.levels.filter((L) => L.filled).length}/${bot.levels.length} FILLED` : '空仓 · 等待信号');
   }
   const eq = bot ? bot.equity(price) : START_CASH;
   setText($('cAvg'), bot && bot.inPos ? money(bot.avg) : '—');
@@ -319,7 +319,7 @@ function renderTrade() {
     bot.levels.forEach((L) => {
       const flash = L.filled && L.t === i - 1 && p.frac < 0.8;
       const cls = flash ? ' flash f' : L.filled ? ' f' : L === next ? ' near' : '';
-      const s = L.filled ? 'FILLED' : L === next ? ((price / L.price - 1) * 100).toFixed(2) + '% AWAY' : 'ARMED';
+      const s = L.filled ? '已成交' : L === next ? ((price / L.price - 1) * 100).toFixed(2) + '% AWAY' : '已布防';
       rows.push(`<div class="grow2${cls}"><span class="l">${L.name}</span><span>${money(L.price)}</span><span>$${fmt(L.usd)}</span><span class="s">${s}</span></div>`);
     });
     rows.push(`<div class="grow2 ghost"><span class="l">SL</span><span>${money(bot.stop)}</span><span>ALL</span><span class="s">${pct(bot.stop / price - 1, 2)}</span></div>`);
@@ -328,10 +328,10 @@ function renderTrade() {
   }
   setHTML($('grows'), rows.join(''));
   const badge = $('gridBadge');
-  setText(badge, bot && bot.inPos ? 'PRE-COMMITTED' : 'ARMED'); badge.classList.toggle('off', !(bot && bot.inPos));
+  setText(badge, bot && bot.inPos ? '预先布好' : '已布防'); badge.classList.toggle('off', !(bot && bot.inPos));
   if (bot && !bot.inPos) {
     const sg = signal(g, S, i - 1);
-    setHTML($('sig'), `SIGNAL <b>${sg.ok ? 'FIRES NEXT BAR' : 'WAITING'}</b> · z ${sg.z.toFixed(2)} · need ${sg.need}`);
+    setHTML($('sig'), `SIGNAL <b>${sg.ok ? '下一根K线触发' : '等待中'}</b> · z ${sg.z.toFixed(2)} · need ${sg.need}`);
   } else if (bot) setHTML($('sig'), `IN TRADE <b>${i - bot.openedAt} h</b> · STOP ${money(bot.stop)}`);
   else setHTML($('sig'), '');
   setHTML($('log'), st.log.slice(-6).map((e) => `<div class="${st.t - e.t < 0.8 ? 'new' : ''}"><b class="${e.cls}">${e.k}</b>${tapeTime(e.time)} <span>${e.txt}</span></div>`).join(''));
@@ -368,7 +368,7 @@ $('bSeed').onclick = () => restart(clamp(Math.round(+$('seed').value) || 1, 1, 9
 $('bRand').onclick = () => restart(1 + Math.floor(Math.random() * 999999));
 $('seed').onkeydown = (e) => { if (e.key === 'Enter') $('bSeed').click(); };
 addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT') return;
+  if (e.target.tagName === '输入') return;
   if (e.key === ' ') { e.preventDefault(); setRunning(!running); }
   else if (e.key === 'ArrowRight') step();
   else if (e.key === 'Escape') st.inspect = null;
