@@ -211,6 +211,9 @@ label { display: block; color: var(--mute); font-size: 8.5px; letter-spacing: .0
   .kv6 { grid-template-columns: repeat(3, 1fr); }
   .legend { position: static; margin-top: 8px; grid-template-columns: 1fr 1fr; }
   .meshp { height: 480px; }
+  .fitp { height: 320px; }
+  .fitp canvas.grow { min-height: 150px; }
+  .ringp { height: 340px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .gene { transition: none; }
