@@ -10,7 +10,7 @@ export const SPECIES = [
   { color: '#60a5fa', cx: 0.20, cy: 0.55 },
   { color: '#0891b2', cx: 0.52, cy: 0.80 },
 ];
-export const STAGES = ['OBSERVE', 'HYPOTHESIZE', 'MUTATE', 'BACKTEST', 'SELECT', 'DEPLOY'];
+export const STAGES = ['观察', '假设', '变异', '回测', '选择', '部署'];
 
 export const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 export const lerp = (a, b, k) => a + (b - a) * k;
@@ -116,9 +116,9 @@ export function drawRing(cv, { stage, sp, pos, gen, cycle, flash }) {
     g.fillText(STAGES[k], lx, ly);
   }
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillStyle = C.mute; g.font = '500 8.5px "JetBrains Mono"'; g.fillText('GENERATION', cx, cy - 22);
+  g.fillStyle = C.mute; g.font = '500 8.5px "JetBrains Mono"'; g.fillText('代', cx, cy - 22);
   g.fillStyle = flash > 0 ? C.royal : C.navy; g.font = '700 30px "Space Grotesk"'; g.fillText(String(gen), cx, cy + 1);
-  g.fillStyle = C.mute; g.font = '500 8.5px "JetBrains Mono"'; g.fillText('CYCLE ' + cycle.toFixed(1) + 'S', cx, cy + 23);
+  g.fillStyle = C.mute; g.font = '500 8.5px "JetBrains Mono"'; g.fillText('循环 ' + cycle.toFixed(1) + 'S', cx, cy + 23);
 }
 
 // ---------------- fitness history ----------------
@@ -162,7 +162,7 @@ export function drawFitness(cv, hist, gf) {
   g.textAlign = 'left'; g.font = '500 8.5px "JetBrains Mono"';
   g.fillStyle = C.royal; g.fillRect(padL + 2, 3, 14, 2.2); g.fillStyle = C.mute; g.fillText('BEST', padL + 20, 4);
   g.strokeStyle = C.sky; g.setLineDash([4, 3]); g.lineWidth = 1.2; line(g, [[padL + 56, 4], [padL + 70, 4]]); g.stroke(); g.setLineDash([]);
-  g.fillText('POPULATION MEAN', padL + 74, 4);
+  g.fillText('种群均值', padL + 74, 4);
 }
 
 // ---------------- gene pool graph ----------------
@@ -239,8 +239,8 @@ export function drawMesh(cv, { nodes, edges, lineage, ct, t, leaderId, inspectId
     g.fillStyle = C.white; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(label, lx + tw / 2, ly + 8.5);
   };
   if (hoverId && hoverId !== inspectId && hoverId !== leaderId) { const n = nodes.get(hoverId); if (n) mark(hoverId, 'g' + hoverId, C.mute, true); }
-  if (inspectId && inspectId !== leaderId) mark(inspectId, 'INSPECT g' + inspectId, C.royal, true);
-  if (leaderId) mark(leaderId, 'LIVE g' + leaderId, C.navy, false);
+  if (inspectId && inspectId !== leaderId) mark(inspectId, '检视 g' + inspectId, C.royal, true);
+  if (leaderId) mark(leaderId, '实时 g' + leaderId, C.navy, false);
   return P;
 }
 
@@ -267,9 +267,9 @@ export function drawKelly(cv, { W, R, t }) {
     g.fillStyle = C.royal; g.beginPath(); g.arc(px, py, 4, 0, Math.PI * 2); g.fill();
     g.fillStyle = C.navy; g.textAlign = px > w - 60 ? 'right' : 'left'; g.fillText('f* ' + Math.round(f * 100) + '%', px + (px > w - 60 ? -12 : 12), py - 4);
   } else {
-    g.fillStyle = C.mute; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('NO EDGE · DO NOT BET', w / 2, h / 2);
+    g.fillStyle = C.mute; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('无优势 · 不下注', w / 2, h / 2);
   }
-  g.fillStyle = C.mute; g.font = '500 8px "JetBrains Mono"'; g.textAlign = 'right'; g.textBaseline = 'alphabetic'; g.fillText('BET FRACTION f → GROWTH', w - 6, h - 1);
+  g.fillStyle = C.mute; g.font = '500 8px "JetBrains Mono"'; g.textAlign = 'right'; g.textBaseline = 'alphabetic'; g.fillText('下注比例 f → 增长', w - 6, h - 1);
 }
 
 // ---------------- paper chart ----------------
@@ -316,7 +316,7 @@ export function drawChart(cv, { s, from, i, frac, bot, preview, marks, empty }) 
   }
   g.save(); g.beginPath(); g.rect(0, 0, w - padR + 2, h); g.clip();
   // oos boundary
-  if (from > k0 - 1 && from <= i) { const x = X(from) - cw / 2; g.strokeStyle = C.grey; g.setLineDash([2, 4]); line(g, [[x, top], [x, bot0]]); g.stroke(); g.setLineDash([]); g.fillStyle = C.mute; g.font = '700 8.5px "JetBrains Mono"'; g.textAlign = 'left'; g.fillText('OUT-OF-SAMPLE →', x + 5, top + 6); }
+  if (from > k0 - 1 && from <= i) { const x = X(from) - cw / 2; g.strokeStyle = C.grey; g.setLineDash([2, 4]); line(g, [[x, top], [x, bot0]]); g.stroke(); g.setLineDash([]); g.fillStyle = C.mute; g.font = '700 8.5px "JetBrains Mono"'; g.textAlign = 'left'; g.fillText('样本外 →', x + 5, top + 6); }
   // MA 12
   const ma = [];
   for (let k = k0; k <= i; k++) { if (k < 11) continue; let sum = 0; for (let j = k - 11; j <= k; j++) sum += j === i ? price : s.close[j]; ma.push([X(k), Y(sum / 12)]); }
